@@ -2,10 +2,14 @@ import "@babel/polyfill";
 import dotenv from "dotenv";
 import "isomorphic-fetch";
 import createShopifyAuth, { verifyRequest } from "@shopify/koa-shopify-auth";
-import Shopify, { ApiVersion } from "@shopify/shopify-api";
+import Shopify, { ApiVersion, DataType } from "@shopify/shopify-api";
 import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
+
+import cors from 'koa-cors';
+import koaBody from 'koa-bodyparser';
+const axios = require('axios');
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -34,6 +38,8 @@ app.prepare().then(async () => {
   const server = new Koa();
   const router = new Router();
   server.keys = [Shopify.Context.API_SECRET_KEY];
+  server.use(cors());
+
   server.use(
     createShopifyAuth({
       async afterAuth(ctx) {
@@ -41,6 +47,8 @@ app.prepare().then(async () => {
         const { shop, accessToken, scope } = ctx.state.shopify;
         const host = ctx.query.host;
         ACTIVE_SHOPIFY_SHOPS[shop] = scope;
+        ACTIVE_SHOPIFY_SHOPS["ShopOrigin"] = shop;
+        ACTIVE_SHOPIFY_SHOPS["AccessToken"] = accessToken;
 
         const response = await Shopify.Webhooks.Registry.register({
           shop,
@@ -56,7 +64,6 @@ app.prepare().then(async () => {
             `Failed to register APP_UNINSTALLED webhook: ${response.result}`
           );
         }
-
         // Redirect to app with shop parameter upon auth
         ctx.redirect(`/?shop=${shop}&host=${host}`);
       },
@@ -99,7 +106,58 @@ app.prepare().then(async () => {
     }
   });
 
+
+
+
+  /* Create custome code */
+  /**
+ * Create Product in shopify
+ */
+     router.post("/create-product", koaBody(), async (ctx) => {
+      let ShopOrigin = ACTIVE_SHOPIFY_SHOPS["ShopOrigin"];
+      let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
+      if (!ctx.request.body) {
+        ctx.body = [{ 'message': 'no items in the cart' }];
+      }
+      if (ShopOrigin || AccessToken) {
+        const client = new Shopify.Clients.Rest(process.env.SHOP, AccessToken);
+        const orderdata = await client.post({
+          path: 'products',
+          data: ctx.request.body,
+          type: DataType.JSON
+        })
+          .then(data => {
+            return data;
+          });
+        ctx.body = orderdata;
+        ctx.status = 200;
+      } else {
+        ctx.body = [{ 'message': 'You are not authorised!' }];
+        ctx.status = 200;
+      }
+      
+    });
+
+  /* Create custome code */
+
+
+
+  const corsOpts = {
+    origin: '*',
+
+    methods: [
+      'GET',
+      'POST',
+    ],
+
+    allowedHeaders: [
+      'Content-Type',
+    ],
+  };
+
   server.use(router.allowedMethods());
+  server.use(cors(corsOpts));
+  server.use(koaBody());
   server.use(router.routes());
   server.listen(port, () => {
     console.log(`> Ready on http://localhost:${port}`);
