@@ -138,7 +138,73 @@ app.prepare().then(async () => {
       
     });
 
-  /* Create custome code */
+  /* Create product code */
+
+  /* demo */
+
+  router.post("/uploadproduct", koaBody(), async (ctx) => {
+    var random_name = require('node-random-name');
+    let ShopOrigin = ACTIVE_SHOPIFY_SHOPS["ShopOrigin"];
+    let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
+    let product_st = random_name();
+    let product_price = between(10, 2000)
+    if (!ctx.request.body) {
+      ctx.body = [{ 'message': 'no items in the cart' }];
+    }
+    if (ShopOrigin || AccessToken) {
+      const client = new Shopify.Clients.Rest(process.env.SHOP, AccessToken);
+      const data = await client.post({
+        path: 'products',
+        data: {"product":{
+          "title":product_st,
+          "body_html":"\u003cstrong\u003eGood snowboard!\u003c\/strong\u003e",
+          "vendor":"Burton",
+          "product_type":product_st,
+          "variants":[{
+            "price": product_price,
+            "sku": "TIS"+product_st,
+             "inventory_quantity": 100,
+            "option1":"Blue",
+            "option2":"155"
+          },
+            {
+              "price": product_price,
+              "sku": "TIS"+product_st,
+              "option1":"Black",
+              "option2":"159"
+            }],
+            "options":[{
+              "name":"Color",
+              "values":[
+                "Blue","Black"
+              ]},{
+                "name":"Size",
+                "values":["155","159"
+              ]}
+            ]
+          }
+        },
+        type: DataType.JSON
+      })
+        .then(data => {
+          return data;
+        });
+      ctx.body = "Product "+product_st+" upload successfully!";
+      ctx.status = 200;
+    } else {
+      ctx.body = [{ 'message': 'You are not authorised!' }];
+      ctx.status = 200;
+    }
+    
+  });
+
+
+
+  function between(min, max) {  
+    return Math.floor(
+      Math.random() * (max - min + 1) + min
+    )
+  }
 
 
 
