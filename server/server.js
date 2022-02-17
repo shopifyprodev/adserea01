@@ -146,7 +146,7 @@ app.prepare().then(async () => {
   /**
  * Create Product in shopify
  */
-     router.post("/create-product", koaBody(), async (ctx) => {
+     router.post("/api/create-product", koaBody(), async (ctx) => {
       if (!ctx.request.body) {
         ctx.body = [{ 'message': 'no items in the cart' }];
       }
@@ -177,6 +177,10 @@ app.prepare().then(async () => {
                 .then(data => {
                   ctx.body = [{ 'status':true, 'message': 'Product create successfully!' }];
                   ctx.status = 200;
+                }).catch(function (error) {
+                  ctx.body = [{ 'status':false, 'message': 'wrong parameters','data': error }];
+               ctx.status = 200;
+                  return error;
                 })
           }
           else{ 
