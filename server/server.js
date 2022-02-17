@@ -153,7 +153,7 @@ app.prepare().then(async () => {
       let ShopOrigin = ACTIVE_SHOPIFY_SHOPS["ShopOrigin"];
       let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
      // let AdminId = ACTIVE_SHOPIFY_SHOPS["iAdminIdd"];
-      let AdminId = 'dr__5fbbac868397bc31e7fd';
+       let AdminId = 'dr__5fbbac868397bc31e7fd';
 
       var config = {
         method: "get",
