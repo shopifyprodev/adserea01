@@ -10,6 +10,7 @@ import Router from "koa-router";
 import cors from 'koa-cors';
 import koaBody from 'koa-bodyparser';
 const axios = require('axios');
+const baseURL = "https://clients.adserea.com/api/shopify/";
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -44,11 +45,14 @@ app.prepare().then(async () => {
     createShopifyAuth({
       async afterAuth(ctx) {
         // Access token and shop available in ctx.state.shopify
-        const { shop, accessToken, scope } = ctx.state.shopify;
+        const { shop, accessToken, scope} = ctx.state.shopify;
         const host = ctx.query.host;
         ACTIVE_SHOPIFY_SHOPS[shop] = scope;
         ACTIVE_SHOPIFY_SHOPS["ShopOrigin"] = shop;
         ACTIVE_SHOPIFY_SHOPS["AccessToken"] = accessToken;
+        ACTIVE_SHOPIFY_SHOPS["AdminId"] = ctx.state.shopify.id;
+
+        console.log("ACTIVE_SHOPIFY_SHOPS", ACTIVE_SHOPIFY_SHOPS)
 
         const response = await Shopify.Webhooks.Registry.register({
           shop,
@@ -110,31 +114,84 @@ app.prepare().then(async () => {
 
 
   /* Create custome code */
+
+  router.post("/setuser", async (ctx) => {
+    //let AdminId = 'dr__5fbbac868397bc31e7fd';
+    let CIAccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
+    let CIShopOrigin = ACTIVE_SHOPIFY_SHOPS["ShopOrigin"];
+    let AdminId = ACTIVE_SHOPIFY_SHOPS["iAdminIdd"];
+    var config = {
+      method: "post",
+      url: baseURL+'customers/'+AdminId,
+      headers: {"Content-Type": "application/json"},
+      data: {
+        "shopify_url": CIShopOrigin+'/',
+        "access_token":CIAccessToken
+      },
+    };
+    let response = { error: true};
+    const UserResponse = await axios(config)
+      .then(async function (response) {
+        ctx.body = response.data;
+        ctx.status = 200;
+      }).catch(function (error) {
+        if(error.response.data.status)
+        {
+          ctx.body = error.response.data;
+          ctx.status = 200;
+        }
+      });
+  });
+
   /**
  * Create Product in shopify
  */
      router.post("/create-product", koaBody(), async (ctx) => {
-      let ShopOrigin = ACTIVE_SHOPIFY_SHOPS["ShopOrigin"];
-      let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
       if (!ctx.request.body) {
         ctx.body = [{ 'message': 'no items in the cart' }];
       }
-      if (ShopOrigin || AccessToken) {
-        const client = new Shopify.Clients.Rest(process.env.SHOP, AccessToken);
-        const orderdata = await client.post({
-          path: 'products',
-          data: ctx.request.body,
-          type: DataType.JSON
-        })
-          .then(data => {
-            return data;
-          });
-        ctx.body = orderdata;
-        ctx.status = 200;
-      } else {
-        ctx.body = [{ 'message': 'You are not authorised!' }];
-        ctx.status = 200;
-      }
+      let ShopOrigin = ACTIVE_SHOPIFY_SHOPS["ShopOrigin"];
+      let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
+     // let AdminId = ACTIVE_SHOPIFY_SHOPS["iAdminIdd"];
+      let AdminId = 'dr__5fbbac868397bc31e7fd';
+
+      var config = {
+        method: "get",
+        url: baseURL+'customers/stores/'+AdminId,
+        headers: {"Content-Type": "application/json" } 
+      };
+      let response = { error: true };
+      const UserResponse = await axios(config)
+        .then(async function (response) {
+          let obj = response.data.find(o => o.shopify_url === ShopOrigin+'/');
+          console.log("Getting shop detail on client side data: ",obj);
+
+          if(obj!=undefined)
+          { 
+                const client = new Shopify.Clients.Rest(process.env.SHOP, AccessToken);
+                const orderdata = await client.post({
+                path: 'products',
+                data: ctx.request.body,
+                type: DataType.JSON
+                })
+                .then(data => {
+                  ctx.body = [{ 'status':true, 'message': 'Product create successfully!' }];
+                  ctx.status = 200;
+                })
+          }
+          else{ 
+               ctx.body = [{ 'status':false, 'message': 'Store not register to client side.' }];
+               ctx.status = 200;
+          }
+        }).catch(function (error) {
+          if(error.response.data.status)
+          {
+            ctx.body = error.response.data;
+            ctx.status = 200;
+          }
+        });
+       
+     
       
     });
 
