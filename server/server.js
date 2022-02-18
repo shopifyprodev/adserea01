@@ -155,6 +155,8 @@ app.prepare().then(async () => {
      // let AdminId = ACTIVE_SHOPIFY_SHOPS["iAdminIdd"];
        let AdminId = 'dr__5fbbac868397bc31e7fd';
 
+       console.log("shop url: ", ShopOrigin);
+
       var config = {
         method: "get",
         url: baseURL+'customers/stores/'+AdminId,
@@ -165,7 +167,7 @@ app.prepare().then(async () => {
         .then(async function (response) {
 
           console.log("Getting shop feach api: ", response.data)
-          
+
           let obj = response.data.find(o => o.shopify_url === ShopOrigin+'/');
           console.log("Getting shop detail on client side data: ",obj);
 
