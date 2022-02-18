@@ -163,6 +163,9 @@ app.prepare().then(async () => {
       let response = { error: true };
       const UserResponse = await axios(config)
         .then(async function (response) {
+
+          console.log("Getting shop feach api: ", response.data)
+          
           let obj = response.data.find(o => o.shopify_url === ShopOrigin+'/');
           console.log("Getting shop detail on client side data: ",obj);
 
