@@ -52,8 +52,6 @@ app.prepare().then(async () => {
         ACTIVE_SHOPIFY_SHOPS["AccessToken"] = accessToken;
         ACTIVE_SHOPIFY_SHOPS["AdminId"] = ctx.state.shopify.id;
 
-        console.log("ACTIVE_SHOPIFY_SHOPS", ACTIVE_SHOPIFY_SHOPS)
-
         const response = await Shopify.Webhooks.Registry.register({
           shop,
           accessToken,
@@ -114,7 +112,6 @@ app.prepare().then(async () => {
 
 
   /* Create custome code */
-
   router.post("/setuser", async (ctx) => {
     //let AdminId = 'dr__5fbbac868397bc31e7fd';
     let CIAccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
@@ -154,9 +151,6 @@ app.prepare().then(async () => {
       let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
      // let AdminId = ACTIVE_SHOPIFY_SHOPS["iAdminIdd"];
        let AdminId = 'dr__5fbbac868397bc31e7fd';
-
-       console.log("shop url: ", ShopOrigin);
-
       var config = {
         method: "get",
         url: baseURL+'customers/stores/'+AdminId,
@@ -165,12 +159,9 @@ app.prepare().then(async () => {
       let response = { error: true };
       const UserResponse = await axios(config)
         .then(async function (response) {
-
-          console.log("Getting shop feach api: ", response.data)
-
+         // console.log("Getting shop feach api: ", response.data)
           let obj = response.data.find(o => o.shopify_url === ShopOrigin+'/');
           console.log("Getting shop detail on client side data: ",obj);
-
           if(obj!=undefined)
           { 
                 const client = new Shopify.Clients.Rest(process.env.SHOP, AccessToken);
