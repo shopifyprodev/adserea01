@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,200&display=swap');
+body{
+  font-family: 'Montserrat', sans-serif;
+  height: 100%;
+}
+html, body, div, span, applet, object, iframe,
+p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+}
+.nav-link{
+  color: grey;
+  font-weight: bold;
+}
+.nav-link.active, .nav-link.hover, .nav-link:hover{
+  color:#412aea;
+  font-weight: bold;
+}
+.themecolor{
+  color: #412aea;
+}
+td,  th{
+  padding: 10px 10px!important;
+}
+input.tginput{
+  margin: 10px;
+}
+.tg-logo img{
+  object-fit: contain;
+  margin: 0px!important;
+  width: auto!important;
+  min-width: auto!important;
+  display: block;
+}
+.fas, .mdb-dataTable-head th{
+  color: #412aea;
+}
+.table-wrapper-scroll-y::-webkit-scrollbar {
+  width: 8px; 
+  position: relative;
+  top: 0px;             
+}
+
+.table-wrapper-scroll-y::-webkit-scrollbar-track {
+  background: transparent;
+  position: relative;       
+}
+
+.table-wrapper-scroll-y::-webkit-scrollbar-thumb {
+  background-color: rgb(172, 170, 169);   
+  border-radius: 10px;      
+  position: relative;
+  top:0px;
+}
+.mdb-datatable-filter input{
+  height: 34px;
+  border-radius: 50px;
+  padding-left: 15px;
+  margin-bottom: 20px;
+  min-width: 250px;
+  float: left;
+}
+.mdb-datatable-filter{
+  min-width: 100%;
+  border-bottom: 1px solid #cfcfcf;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.form-control:focus {
+  color: #212529;
+  background-color: #fff;
+  border-color: #412aea;
+  outline: 0;
+  box-shadow: none;
+}
+ul li.page-item:first-child a.page-link{
+  border-radius: 50px 0px 0px 50px;
+}
+ul li.page-item:nth-child(2) a.page-link{
+  border-radius: 0px 50px 50px 0px;
+}
+.mdb-datatable-length .custom-select{
+  min-width: 60px;
+}
+.tg-heading h4{
+  color: #484444;
+}
+@media (max-width:767px) {
+  .mdb-datatable{
+    overflow: hidden;
+  }
+  .mdb-datatable .col-sm-12{
+    overflow: scroll;
+  }
+  .tg-logo img{
+    margin: auto!important;
+  }
+}
