@@ -19,7 +19,8 @@ function Index(props){
      <Toaster />
 
       <Heading>
-      Adserea App {" "}
+        <br></br>
+      {" "}
         <span role="img" aria-label="tada emoji">
           
         </span>
