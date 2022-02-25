@@ -5,11 +5,11 @@ import axios from "axios";
 import Header from '../components/ub-header';
 import Footer from '../components/ub-footer';
 
-function Index(props){
-  async function UploadProduct(){
-    const res = await axios.post("/uploadproduct");
-    toast.success(res.data);
-  }  
+// function Index(props){
+//   async function UploadProduct(){
+//     const res = await axios.post("/uploadproduct");
+//     toast.success(res.data);
+//   }  
 
 
   return (
@@ -25,9 +25,9 @@ function Index(props){
           
         </span>
       </Heading>
-      <p>Click button to upload Demo Products.</p>
+      {/* <p>Click button to upload Demo Products.</p>
       <input value="Upload Demo Product" type="button" className="btn btn-info" onClick={UploadProduct}
-      ></input>
+      ></input> */}
 
       <Footer/>
     </Page>
