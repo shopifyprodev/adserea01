@@ -5,7 +5,7 @@ import axios from "axios";
 import Header from '../components/ub-header';
 import Footer from '../components/ub-footer';
 
-// function Index(props){
+ function Index(props){
 //   async function UploadProduct(){
 //     const res = await axios.post("/uploadproduct");
 //     toast.success(res.data);
@@ -32,5 +32,5 @@ import Footer from '../components/ub-footer';
       <Footer/>
     </Page>
   );
-}
+    }
 export default Index;

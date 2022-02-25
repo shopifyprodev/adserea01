@@ -1,4 +1,3 @@
-import ActiveLink from './Activelink';
 import Logoimg from '../public/img/logo.svg';
 import Image from 'next/image'
 
@@ -12,9 +11,9 @@ export default function Header() {
           <Image className='' loader={({src})=> src} src={Logoimg} alt="" height={45} />
         </a>
         <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto me-3">
-          <ActiveLink activeClassName="active" href="/">
-          <a className="me-3 py-2 text-decoration-none nav-link">Dashboard</a>
-          </ActiveLink>
+          
+          <a className="me-3 py-2 text-decoration-none nav-link" href="/">Dashboard</a>
+         
          
         </nav>
       </div>
