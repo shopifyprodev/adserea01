@@ -251,6 +251,9 @@ app.prepare().then(async () => {
             }
             createdjsonFields.push(createdoptionfield)
         });
+
+
+        
         var createdjsondata = {
             "product": {
                 "product_type": response.first_level_category_name,
