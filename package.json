@@ -77,5 +77,8 @@
     "*.{js,css,json,md}": [
       "prettier --write"
     ]
+  },
+  "engines": {
+    "node": "16.13.1"
   }
 }
