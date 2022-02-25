@@ -182,10 +182,12 @@ app.prepare().then(async () => {
                     }
                 }, index * interval);
             });
-            ctx.body = { 'status': false, 'message': 'Product upload successfully' };
+            ctx.body = { 'status': true, 'message': 'Product upload successfully' };
             ctx.status = 200;
         }).catch(function (error) {
             console.log("Product not inserted.", error);
+            ctx.body = { 'status': false, 'message': "Product not upload", 'error': error };
+            ctx.status = 200;
         })
 
 
