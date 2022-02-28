@@ -6,13 +6,38 @@ import Shopify, { ApiVersion, DataType } from "@shopify/shopify-api";
 import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
-
 import cors from 'koa-cors';
 import koaBody from 'koa-bodyparser';
 const axios = require('axios');
 const baseURL = "https://clients.adserea.com/api/shopify/";
 const RapidKey = '248e1c7a7emsh88651add95cb2fep1af877jsn686d7d00b75a';
 const date = require('date-and-time')
+const { Pool } = require("pg");
+
+const DB_HOST = process.env.DB_HOST;
+const DB_USER = process.env.DB_USER;
+const DB_NAME = process.env.DB_NAME;
+const DB_PASSWORD = process.env.DB_PASSWORD;
+
+
+const pool = new Pool({
+  user: DB_USER,
+  host: DB_HOST,
+  database: DB_NAME,
+  password: DB_PASSWORD  
+});
+
+
+pool.connect(function (err) {
+    if (err) throw err;
+    console.log("Connected to DB!");
+  
+    pool.query("CREATE TABLE IF NOT EXISTS adserea_product_import (id serial PRIMARY KEY, userid VARCHAR ( 255 ) NOT NULL, authtoken VARCHAR ( 255 ) NOT NULL, storeorigin VARCHAR ( 100 ) NOT NULL, product_name VARCHAR ( 255 ) NULL, product_main_image VARCHAR ( 255 ) NULL,product_variant_json text NULL)", (err, res) => {
+      console.log('Create Executed');
+    });
+
+});
+
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -115,6 +140,24 @@ app.prepare().then(async () => {
         let flag = 0;
         let error = false;
         const allimages = [];
+        const LoginId = 'dr__5fbbac868397bc31e7fd';
+
+       // check user exist or not //
+        var config = {
+            method: "get",
+            url: `${baseURL}/customers/stores/`+LoginId,
+            headers: {},
+            };
+            const shopifyStoresDataGet = await axios(config)
+            .then(async function (response) {
+           // console.log("User Catch", response.data)
+           // response.data.includes("Banana", 3);
+            })
+            .catch(function (error) {
+            console.log(error);
+            });
+        // check user exist or not //
+
         var images = GetProduct.product_images;
         await images.forEach(async function loop(itemimg) {
             var createdimage = {
@@ -128,7 +171,6 @@ app.prepare().then(async () => {
                 "body_html": GetProduct.product_description,
                 "vendor": "Adserea",
                 "tags": "Adserea Product Import",
-                "images": allimages,
                 "variants": [{ "price": GetProduct.product_price }]
             }
         }
@@ -167,7 +209,7 @@ app.prepare().then(async () => {
                                 });
                                 const CheckCountry = !createdjsonloc.includes('ShipsFrom', 'Plugstandard')
                                 if (CheckCountry == true) {
-                                    ProductAddInStore(ProductInsId, response)
+                                    ProductAddInStore(ProductInsId, response, allimages)
                                     flag++;
                                     // console.log('flag 1', flag);
                                 }
@@ -191,13 +233,15 @@ app.prepare().then(async () => {
         })
 
 
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise(resolve => setTimeout(resolve, 20000));
         console.log("Upload successfully.")
     });
 
-    async function ProductAddInStore(ProductInsId, response) {
+    async function ProductAddInStore(ProductInsId, response, allimages) {
         const createdjsonFields = [];
         const allItems2 = [];
+        const mergeimages = [];
+        const megamergeimages = [];
         var itemvariantslocation = response.data.skuList;
         var itemskuProperties = response.data.skuProperties;
         let finalArr = {};
@@ -213,7 +257,7 @@ app.prepare().then(async () => {
                 }
                 finalArr[propertyValueId] = createdoptionfield;
             })
-        });
+        })
         await itemvariantslocation.forEach(async function loop(itemvarid) {
             var sepid = itemvarid.skuPropIds;
             var price = itemvarid.skuVal.skuCalPrice;
@@ -225,25 +269,23 @@ app.prepare().then(async () => {
             else if (price >= 20 && price <= 40) {
                 price = price * 2.5
             }
-            else {
-                price = price * 2.
+            else { price = price * 2.
             }
-
             let variantJson = {};
             for (var a in pathid) {
-                var variable = pathid[a]
+                var variable = pathid[a];
+                var barcodes = '';
                 var propertyValueName = finalArr[variable]['propertyValueName'];
                 a = parseInt(a) + 1;
-                variantJson['option' + a] = propertyValueName;
+                variantJson['option' + a] = barcodes =propertyValueName;
                 variantJson['price'] = price;
                 variantJson['inventory_quantity'] = availQuantity;
                 variantJson['inventory_management'] = "shopify";
+                variantJson['barcode'] = barcodes;
             }
             allItems2.push(variantJson)
         });
-
-        // console.log("variants array : ", allItems2)
-
+      
         var itemvariantslocation = response.data.skuProperties;
         await itemvariantslocation.forEach(async function loop(itemloc) {
             var createdoptionfield = {
@@ -251,31 +293,69 @@ app.prepare().then(async () => {
             }
             createdjsonFields.push(createdoptionfield)
         });
-
-
-        
+        var itemvariantsimg = response.data.skuProperties[0].skuPropertyValues;
+        await itemvariantsimg.forEach(async function loop(itemimages) {
+            var createdimg = {
+                "src": itemimages.skuPropertyImagePath,
+                "alt": itemimages.propertyValueDisplayName,
+            }
+            mergeimages.push(createdimg)
+        });
+        var MegaIMages = allimages.concat(mergeimages);
         var createdjsondata = {
             "product": {
                 "product_type": response.first_level_category_name,
                 "status": "active",
                 "variants": allItems2,
                 "options": createdjsonFields,
+                "images": MegaIMages
             }
         }
-        let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
+        let CIAccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
         let CIShopOrigin = ACTIVE_SHOPIFY_SHOPS["ShopOrigin"];
-        const client = new Shopify.Clients.Rest(process.env.SHOP, AccessToken);
+        let AdminId = ACTIVE_SHOPIFY_SHOPS["iAdminIdd"];
+        const ProductName = response.product_title
+        var itemvarr = JSON.stringify(allItems2);
+        const client = new Shopify.Clients.Rest(process.env.SHOP, CIAccessToken);
         const orderdata = await client.put({
             path: 'products/' + ProductInsId,
             data: createdjsondata,
             type: DataType.JSON
-        }).then(data => {
-            //  console.log("Product update");
-            return data;
+        }).then(async data => {
+                var VariantDatas = data.body.product.variants;
+                var Variantimm = data.body.product.images;
+
+                await VariantDatas.forEach(async function loop(ProVarr) {
+                   var Variantid =  ProVarr.id
+                   var barcode =  ProVarr.option1
+                   var aquaticCreatures =  Variantimm.filter(async function(Variantimm) {
+                    if(Variantimm.alt == barcode)
+                    {
+                        var imgstid = Variantimm.id;
+                        const dataimms = await client.put({
+                            path: 'variants/'+Variantid,
+                            data: {"variant":{"id":Variantid,"image_id":imgstid}},
+                            type: DataType.JSON,
+                            });
+
+                    }
+                  })
+                });
+
+
+              
+                
+
+    
+          //  return data;
         }).catch(function (error) {
             //  console.log("Product not update");
-            return error;
+           // return error;
         })
+
+
+        
+      
     }
 
     /* Create custome code */
