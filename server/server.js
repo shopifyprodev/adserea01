@@ -11,33 +11,7 @@ import koaBody from 'koa-bodyparser';
 const axios = require('axios');
 const baseURL = "https://clients.adserea.com/api/shopify/";
 const RapidKey = '248e1c7a7emsh88651add95cb2fep1af877jsn686d7d00b75a';
-const date = require('date-and-time')
-const { Pool } = require("pg");
-
-const DB_HOST = process.env.DB_HOST;
-const DB_USER = process.env.DB_USER;
-const DB_NAME = process.env.DB_NAME;
-const DB_PASSWORD = process.env.DB_PASSWORD;
-
-
-const pool = new Pool({
-  user: DB_USER,
-  host: DB_HOST,
-  database: DB_NAME,
-  password: DB_PASSWORD  
-});
-
-
-pool.connect(function (err) {
-    if (err) throw err;
-    console.log("Connected to DB!");
-  
-    pool.query("CREATE TABLE IF NOT EXISTS adserea_product_import (id serial PRIMARY KEY, userid VARCHAR ( 255 ) NOT NULL, authtoken VARCHAR ( 255 ) NOT NULL, storeorigin VARCHAR ( 100 ) NOT NULL, product_name VARCHAR ( 255 ) NULL, product_main_image VARCHAR ( 255 ) NULL,product_variant_json text NULL)", (err, res) => {
-      console.log('Create Executed');
-    });
-
-});
-
+const date = require('date-and-time');
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
