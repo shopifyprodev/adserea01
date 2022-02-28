@@ -115,7 +115,6 @@ app.prepare().then(async () => {
         let error = false;
         const allimages = [];
         const LoginId = 'dr__5fbbac868397bc31e7fd';
-
        // check user exist or not //
         var config = {
             method: "get",
@@ -145,7 +144,8 @@ app.prepare().then(async () => {
                 "body_html": GetProduct.product_description,
                 "vendor": "Adserea",
                 "tags": "Adserea Product Import",
-                "variants": [{ "price": GetProduct.product_price }]
+                "variants": [{ "price": GetProduct.product_price }],
+                "images": allimages
             }
         }
         let AccessToken = ACTIVE_SHOPIFY_SHOPS["AccessToken"];
